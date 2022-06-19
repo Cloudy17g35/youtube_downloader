@@ -1,6 +1,8 @@
+from pydantic import PathNotExistsError
 from youtube_video import YoutubeVideo
 import json
 from typing import List
+import os
 
 with open('config.json') as f:
     config_file = json.loads(f.read())
@@ -8,7 +10,18 @@ with open('config.json') as f:
     output_folder:str = config_file['output_folder']
 
 
+def create_folder(folder_name:str):
+    if not os.path.exists(folder_name):
+        os.mkdir(output_folder)
+        
+
+def check_if_output_folder_exists(output_folder:str) -> None:
+    if not os.path.exists(output_folder):
+        create_folder(output_folder)
+    
+
 def main():
+    check_if_output_folder_exists(output_folder)
     for link_to_video in links_to_videos:
         yt_video:YoutubeVideo = YoutubeVideo(link_to_video)
         streams = yt_video.get_streams
@@ -16,7 +29,7 @@ def main():
         print(f'''Youtube video 
 {yt_video} 
 will be downloaded to folder: {output_folder}''')
-        video_with_highest_res.download('Videos')
+        video_with_highest_res.download(output_folder)
 
     
 if __name__ == '__main__':
